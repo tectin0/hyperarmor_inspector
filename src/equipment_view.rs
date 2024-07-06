@@ -1,5 +1,4 @@
-use egui::{ComboBox, Slider};
-use strum::IntoEnumIterator;
+use egui::Slider;
 
 use crate::{
     data::Attacks,
@@ -148,8 +147,7 @@ impl EquipmentView {
 
         ui.label(format!(
             "Weapon Hyperarmor: {}",
-            self.weapon_hyperarmor
-                .and_then(|x| Some(x.to_string()))
+            self.weapon_hyperarmor.map(|x| x.to_string())
                 .unwrap_or_default()
         ));
 
@@ -169,8 +167,7 @@ impl EquipmentView {
 
         ui.label(format!(
             "Hyperarmor: {}",
-            self.hyperarmor
-                .and_then(|x| Some(x.to_string()))
+            self.hyperarmor.map(|x| x.to_string())
                 .unwrap_or_default()
         ));
 
@@ -182,8 +179,7 @@ impl EquipmentView {
 
         ui.label(format!(
             "Incoming Poise Damage Multiplier: {}",
-            self.incoming_poise_damage_multiplier
-                .and_then(|x| Some(x.to_string()))
+            self.incoming_poise_damage_multiplier.map(|x| x.to_string())
                 .unwrap_or_default()
         ));
 
@@ -209,7 +205,7 @@ pub fn weapon_hyperarmor_from_weapon_and_attack(
 ) -> f64 {
     if innate_weapon_poise > 77 {
         innate_weapon_poise as f64 * hyper_armor_multiplier
-    } else if innate_weapon_poise <= 77 && innate_weapon_poise >= 52 {
+    } else if (52..=77).contains(&innate_weapon_poise) {
         if weapon_class == "Great Katana" {
             if weapon == "Rakshasa's Great Katana" {
                 innate_weapon_poise as f64 * hyper_armor_multiplier

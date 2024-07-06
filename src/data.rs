@@ -1,12 +1,10 @@
 use std::{
     collections::BTreeMap,
-    default,
     fmt::{Display, Formatter},
 };
 
 use convert_case::Casing;
-use eframe::App;
-use egui::{ComboBox, InnerResponse, Layout};
+use egui::Layout;
 use egui_extras::{Column, TableBuilder};
 use itertools::Itertools;
 use strum::{EnumIter, IntoEnumIterator};
@@ -129,7 +127,7 @@ impl Attacks {
                 for attack in Attacks::iter() {
                     let attack_str = format!("{}", attack);
 
-                    ui.selectable_value(selected_attack, Some(attack), format!("{}", attack_str))
+                    ui.selectable_value(selected_attack, Some(attack), attack_str.to_string())
                         .clicked()
                         .then(|| {
                             has_attack_changed = true;
@@ -260,7 +258,7 @@ impl WeaponPoiseDamage {
         multiplier: f64,
     ) -> Option<PoiseDamageValues> {
         Some(PoiseDamageValues(
-            self.get_poise_damage_by_attack(&attack)?
+            self.get_poise_damage_by_attack(attack)?
                 .0
                 .iter()
                 .map(|n| (*n as f64 * multiplier) as PoiseDamage)

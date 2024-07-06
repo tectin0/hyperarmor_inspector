@@ -31,7 +31,7 @@ impl WeaponSelectView {
                 ui.horizontal_wrapped(|ui| {
                     ui.selectable_value(&mut self.selected_weapon_class, None, "All");
 
-                    for (weapon_class, weapons) in WEAPON_CLASSES.iter() {
+                    for (weapon_class, _weapons) in WEAPON_CLASSES.iter() {
                         ui.selectable_value(
                             &mut self.selected_weapon_class,
                             Some(weapon_class.clone()),

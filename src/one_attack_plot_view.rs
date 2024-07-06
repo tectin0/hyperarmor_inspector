@@ -1,11 +1,8 @@
 use std::collections::{BTreeMap, HashMap};
 
-use egui::{Layout, Rect, Slider, Vec2};
+use egui::Slider;
 use egui_extras::{Size, StripBuilder};
-use egui_plot::{
-    CoordinatesFormatter, Line, Plot, PlotItem, PlotPoint, PlotPoints, PlotResponse, Points,
-};
-use itertools::Itertools;
+use egui_plot::{Line, Plot, PlotPoint, PlotPoints, PlotResponse, Points};
 
 use crate::{
     data::Attacks,
@@ -39,7 +36,6 @@ impl OneAttackPlotView {
         let weapon_class_ids = WEAPON_CLASSES
             .keys()
             .cloned()
-            .into_iter()
             .map(|class| (egui::Id::new(class.clone()), class))
             .collect::<HashMap<egui::Id, String>>();
 
@@ -72,17 +68,17 @@ impl OneAttackPlotView {
             .title_bar(true)
             .open(&mut self.is_open)
             .show(ui.ctx(), |ui| {
-                let available_rect = ui.available_rect_before_wrap();
+                let _available_rect = ui.available_rect_before_wrap();
 
                 if self.is_attack_changed || *is_changed_incoming_poise_damage_multiplier {
                     self.poise_damage_values_for_attack_by_class = POISE_DATA
                         .get_poise_damage_values_for_attack_by_class(
-                            &self.selected_attack.as_ref().unwrap(),
+                            self.selected_attack.as_ref().unwrap(),
                             incoming_poise_damage_multiplier,
                         );
                 }
 
-                if let Some(selected_attack) = &self.selected_attack {
+                if let Some(_selected_attack) = &self.selected_attack {
                     StripBuilder::new(ui)
                         .size(Size::remainder())
                         .size(Size::relative(0.2))
@@ -91,14 +87,14 @@ impl OneAttackPlotView {
                                 let plot = Plot::new("One Attack Plot");
 
                                 let PlotResponse {
-                                    response,
+                                    response: _,
                                     inner:
                                         (
-                                            screen_pos,
+                                            _screen_pos,
                                             pointer_coordinate,
-                                            pointer_coordinate_drag_delta,
-                                            bounds,
-                                            hovered,
+                                            _pointer_coordinate_drag_delta,
+                                            _bounds,
+                                            _hovered,
                                         ),
                                     hovered_plot_item,
                                     ..
@@ -109,7 +105,9 @@ impl OneAttackPlotView {
                                         self.poise_damage_values_for_attack_by_class.iter()
                                     {
                                         let points = poise_damage_values.iter().enumerate().map(
-                                            |(i, (weapon, poise_damage))| [i as f64, *poise_damage],
+                                            |(i, (_weapon, poise_damage))| {
+                                                [i as f64, *poise_damage]
+                                            },
                                         );
 
                                         max_x_length = max_x_length.max(points.len());

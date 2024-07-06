@@ -18,7 +18,7 @@ struct App {
 }
 
 impl App {
-    fn new(cc: &eframe::CreationContext<'_>) -> Self {
+    fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         Self {
             poise_data_view: poise_data_view::PoiseDataView::new(),
             equipment_view: equipment_view::EquipmentView::new(),
@@ -28,7 +28,7 @@ impl App {
 }
 
 impl eframe::App for App {
-    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.selectable_label(self.equipment_view.is_open, "Equipment")

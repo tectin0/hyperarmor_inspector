@@ -23,16 +23,11 @@ impl PoiseData {
     pub fn get_poise_damage_values_for_attack(&self, attack: &Attacks) -> Vec<f64> {
         self.iter()
             .filter_map(
-                |(_, poise_data)| match poise_data.get_poise_damage_by_attack(attack) {
-                    Some(poise_damage_values) => Some(
-                        poise_damage_values
+                |(_, poise_data)| poise_data.get_poise_damage_by_attack(attack).map(|poise_damage_values| poise_damage_values
                             .0
                             .iter()
                             .map(|&value| value as f64)
-                            .sum::<f64>(),
-                    ),
-                    None => None,
-                },
+                            .sum::<f64>()),
             )
             .collect()
     }
@@ -56,7 +51,7 @@ impl PoiseData {
                     Some(poise_damage_for_attack) => {
                         poise_damage_values_for_attack_per_class
                             .entry(weapon_class.clone())
-                            .or_insert_with(Vec::new)
+                            .or_default()
                             .push((
                                 weapon.clone(),
                                 poise_damage_for_attack.0.iter().sum::<u16>() as f64,
