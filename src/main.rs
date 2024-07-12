@@ -1,13 +1,37 @@
-use eframe::egui;
+// #![windows_subsystem = "windows"]
+
+use eframe::{egui, NativeOptions};
+use egui::ViewportBuilder;
 use hyperarmor_inspector::*;
 
 fn main() -> eframe::Result {
-    let native_options = eframe::NativeOptions::default();
-    eframe::run_native(
+    simple_logger::SimpleLogger::new()
+        .with_level(log::LevelFilter::Warn)
+        .with_module_level("hyperarmor_inspector", log::LevelFilter::Debug)
+        .init()
+        .unwrap();
+
+    log::info!("Starting Hyperarmor Inspector");
+
+    let native_options = NativeOptions {
+        viewport: ViewportBuilder::default().with_inner_size([1024.0, 768.0]),
+        ..Default::default()
+    };
+
+    match eframe::run_native(
         "Minimum Poise Calculator",
         native_options,
         Box::new(|cc| Ok(Box::new(App::new(cc)))),
-    )
+    ) {
+        Ok(_) => {
+            log::info!("Shutting down Hyperarmor Inspector");
+            Ok(())
+        }
+        Err(e) => {
+            log::error!("Error: {}", e);
+            Err(e)
+        }
+    }
 }
 
 #[derive(Default)]

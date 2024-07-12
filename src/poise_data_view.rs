@@ -29,38 +29,45 @@ impl PoiseDataView {
     }
 
     pub fn show(&mut self, ui: &mut egui::Ui, incoming_poise_damage_multiplier: &Option<f64>) {
-        ui.button("Select Weapon").clicked().then(|| {
-            self.weapon_select_view.is_open = true;
-        });
+        egui::Window::new("Weapon Poise Damage Data")
+            .id("Weapon Poise Damage Data Window".into())
+            .resizable(true)
+            .title_bar(true)
+            .open(&mut self.is_open)
+            .show(ui.ctx(), |ui| {
+                ui.button("Select Weapon").clicked().then(|| {
+                    self.weapon_select_view.is_open = true;
+                });
 
-        if self.weapon_select_view.is_open {
-            self.weapon_select_view.show(ui, "Incoming Poise Damage");
-        }
-
-        if let Some(selected_weapon) = &self.weapon_select_view.selected_weapon {
-            self.selected_weapon = Some(selected_weapon.clone());
-            self.weapon_select_view.selected_weapon = None;
-            self.is_selected_weapon_change = true;
-        }
-
-        if let Some(weapon) = &self.selected_weapon {
-            let weapon_poise_data = POISE_DATA.get(weapon).unwrap();
-
-            match incoming_poise_damage_multiplier {
-                Some(incoming_poise_damage_multiplier) => {
-                    let weapon_poise_damage =
-                        weapon_poise_data.apply_multiplier(*incoming_poise_damage_multiplier);
-
-                    self.selected_poise_damage = Some(weapon_poise_damage);
+                if self.weapon_select_view.is_open {
+                    self.weapon_select_view.show(ui, "Incoming Poise Damage");
                 }
-                None => {
-                    self.selected_poise_damage = Some(weapon_poise_data.clone());
-                }
-            }
-        }
 
-        if let Some(selected_poise_damage) = &self.selected_poise_damage {
-            selected_poise_damage.view(ui);
-        }
+                if let Some(selected_weapon) = &self.weapon_select_view.selected_weapon {
+                    self.selected_weapon = Some(selected_weapon.clone());
+                    self.weapon_select_view.selected_weapon = None;
+                    self.is_selected_weapon_change = true;
+                }
+
+                if let Some(weapon) = &self.selected_weapon {
+                    let weapon_poise_data = POISE_DATA.get(weapon).unwrap();
+
+                    match incoming_poise_damage_multiplier {
+                        Some(incoming_poise_damage_multiplier) => {
+                            let weapon_poise_damage = weapon_poise_data
+                                .apply_multiplier(*incoming_poise_damage_multiplier);
+
+                            self.selected_poise_damage = Some(weapon_poise_damage);
+                        }
+                        None => {
+                            self.selected_poise_damage = Some(weapon_poise_data.clone());
+                        }
+                    }
+                }
+
+                if let Some(selected_poise_damage) = &self.selected_poise_damage {
+                    selected_poise_damage.view(ui);
+                }
+            });
     }
 }

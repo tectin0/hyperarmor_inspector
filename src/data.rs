@@ -733,7 +733,7 @@ pub fn poise_string_to_numbers(s: &str) -> Vec<PoiseDamage> {
         .map(|s| match s.trim().parse::<f32>() {
             Ok(f) => f as PoiseDamage,
             Err(error) => {
-                log::error!(
+                log::warn!(
                     "Error parsing PoiseDamage: {} with error: {}. Defaulting to 0",
                     s,
                     error

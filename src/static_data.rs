@@ -22,13 +22,17 @@ impl Deref for PoiseData {
 impl PoiseData {
     pub fn get_poise_damage_values_for_attack(&self, attack: &Attacks) -> Vec<f64> {
         self.iter()
-            .filter_map(
-                |(_, poise_data)| poise_data.get_poise_damage_by_attack(attack).map(|poise_damage_values| poise_damage_values
+            .filter_map(|(_, poise_data)| {
+                poise_data
+                    .get_poise_damage_by_attack(attack)
+                    .map(|poise_damage_values| {
+                        poise_damage_values
                             .0
                             .iter()
                             .map(|&value| value as f64)
-                            .sum::<f64>()),
-            )
+                            .sum::<f64>()
+                    })
+            })
             .collect()
     }
 
@@ -105,9 +109,10 @@ pub static WEAPON_CLASSES: LazyLock<BTreeMap<String, Vec<String>>> = LazyLock::n
 });
 
 pub const BULLGOAT_MULTIPLIER: f64 = 0.25;
+pub const RECOVERY_MULTIPLIER: f64 = 0.8;
 
-pub const COLOSSAL_POISE_DAMAGE_MULTIPLIER: f64 = 0.5625;
-pub const POISE_DAMAGE_MULTIPLIER: f64 = 0.8125;
+pub const COLOSSAL_POISE_DAMAGE_MULTIPLIER: f64 = 0.45;
+pub const POISE_DAMAGE_MULTIPLIER: f64 = 0.65;
 
 pub const INNATE_WEAPON_POISE: LazyLock<BTreeMap<String, u16>> = LazyLock::new(|| {
     // https://www.reddit.com/r/EldenRingPVP/comments/1dl2j8n/elden_ring_shadow_of_the_erdtree_112_hyper_armour/

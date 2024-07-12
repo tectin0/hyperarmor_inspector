@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, HashMap};
 
-use egui::Slider;
+use egui::{Layout, Slider};
 use egui_extras::{Size, StripBuilder};
 use egui_plot::{Line, Plot, PlotPoint, PlotPoints, PlotResponse, Points};
 
@@ -21,9 +21,11 @@ pub struct OneAttackPlotView {
     selected_attack: Option<Attacks>,
     is_attack_changed: bool,
     poise_damage_values_for_attack_by_class: BTreeMap<String, Vec<(String, f64)>>,
+    selected_weapon_classes: BTreeMap<String, bool>,
     hovered_weapon: Option<String>,
     hovered_weapon_class: Option<String>,
     plot_config: PlotConfig,
+    rect: Option<egui::Rect>,
 }
 
 impl OneAttackPlotView {
@@ -45,12 +47,18 @@ impl OneAttackPlotView {
             selected_attack: Some(selected_attack),
             is_attack_changed: false,
             poise_damage_values_for_attack_by_class,
+            selected_weapon_classes: WEAPON_CLASSES
+                .keys()
+                .cloned()
+                .map(|class| (class, true))
+                .collect(),
             hovered_weapon: None,
             hovered_weapon_class: None,
             plot_config: PlotConfig {
                 point_radius: 3.0,
                 ..Default::default()
             },
+            ..Default::default()
         }
     }
 
@@ -62,13 +70,18 @@ impl OneAttackPlotView {
         hyperarmor: &Option<f64>,
         armor_poise: &u16,
     ) {
-        egui::Window::new("One Attack Plot")
+        const INITIAL_WINDOW_SIZE: [f32; 2] = [600.0, 400.0];
+
+        let window = egui::Window::new("One Attack Plot")
             .id("One Attack Plot Window".into())
             .resizable(true)
             .title_bar(true)
+            .default_size(INITIAL_WINDOW_SIZE)
             .open(&mut self.is_open)
             .show(ui.ctx(), |ui| {
-                let _available_rect = ui.available_rect_before_wrap();
+                if self.rect.is_none() {
+                    return;
+                }
 
                 if self.is_attack_changed || *is_changed_incoming_poise_damage_multiplier {
                     self.poise_damage_values_for_attack_by_class = POISE_DATA
@@ -80,8 +93,9 @@ impl OneAttackPlotView {
 
                 if let Some(_selected_attack) = &self.selected_attack {
                     StripBuilder::new(ui)
-                        .size(Size::remainder())
-                        .size(Size::relative(0.2))
+                        .cell_layout(Layout::top_down(egui::Align::Min))
+                        .size(Size::relative(0.7))
+                        .size(Size::initial(200.0))
                         .horizontal(|mut strip| {
                             strip.cell(|ui| {
                                 let plot = Plot::new("One Attack Plot");
@@ -104,6 +118,11 @@ impl OneAttackPlotView {
                                     for (weapon_class, poise_damage_values) in
                                         self.poise_damage_values_for_attack_by_class.iter()
                                     {
+                                        if !self.selected_weapon_classes.get(weapon_class).unwrap()
+                                        {
+                                            continue;
+                                        }
+
                                         let points = poise_damage_values.iter().enumerate().map(
                                             |(i, (_weapon, poise_damage))| {
                                                 [i as f64, *poise_damage]
@@ -185,10 +204,66 @@ impl OneAttackPlotView {
                                     if let Some(hovered_weapon) = &self.hovered_weapon {
                                         ui.label(format!("Hovered Weapon: {}", hovered_weapon));
                                     }
+
+                                    ui.separator();
+
+                                    let mut unselect_all_other = None;
+
+                                    ui.horizontal_wrapped(|ui| {
+                                        for (weapon_class, is_selected) in
+                                            self.selected_weapon_classes.iter_mut()
+                                        {
+                                            ui.selectable_label(*is_selected, weapon_class)
+                                                .clicked()
+                                                .then(|| {
+                                                    *is_selected = !*is_selected;
+
+                                                    if ui.ctx().input(|i| i.modifiers.ctrl) {
+                                                        unselect_all_other =
+                                                            Some(weapon_class.clone());
+                                                    }
+                                                });
+                                        }
+                                    });
+
+                                    if let Some(unselect_all_other) = unselect_all_other {
+                                        for (weapon_class, is_selected) in
+                                            self.selected_weapon_classes.iter_mut()
+                                        {
+                                            if *weapon_class != unselect_all_other {
+                                                *is_selected = false;
+                                            }
+
+                                            if *weapon_class == unselect_all_other {
+                                                *is_selected = true;
+                                            }
+                                        }
+                                    }
+
+                                    ui.horizontal(|ui| {
+                                        ui.button("Deselect All").clicked().then(|| {
+                                            for is_selected in
+                                                self.selected_weapon_classes.values_mut()
+                                            {
+                                                *is_selected = false;
+                                            }
+                                        });
+
+                                        ui.button("Select All").clicked().then(|| {
+                                            for is_selected in
+                                                self.selected_weapon_classes.values_mut()
+                                            {
+                                                *is_selected = true;
+                                            }
+                                        });
+                                    });
                                 });
                             })
                         });
                 }
-            });
+            })
+            .unwrap();
+
+        self.rect = Some(window.response.interact_rect);
     }
 }
